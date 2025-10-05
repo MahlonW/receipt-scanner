@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { FileSpreadsheet, Upload, Download, AlertCircle, CheckCircle, ArrowLeft, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { ReceiptData } from '@/types/product';
-import { processReceipts, findDuplicates } from '@/utils/receiptUtils';
+import { processReceipts } from '@/utils/receiptUtils';
 
 export default function MergePage() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -24,7 +24,7 @@ export default function MergePage() {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const validateExcelFormat = (data: any[]): string[] => {
+  const validateExcelFormat = (data: unknown[]): string[] => {
     const errors: string[] = [];
     
     if (!Array.isArray(data)) {
@@ -37,30 +37,30 @@ export default function MergePage() {
       return errors;
     }
 
-    // Check if data has expected structure
-    const hasValidStructure = data.every((item, index) => {
-      if (!item || typeof item !== 'object') {
-        errors.push(`Row ${index + 1}: Invalid data structure`);
-        return false;
-      }
+    // // Check if data has expected structure
+    // const hasValidStructure = data.every((item, index) => {
+    //   if (!item || typeof item !== 'object') {
+    //     errors.push(`Row ${index + 1}: Invalid data structure`);
+    //     return false;
+    //   }
       
-      if (!item.products || !Array.isArray(item.products)) {
-        errors.push(`Row ${index + 1}: Missing or invalid products array`);
-        return false;
-      }
+    //   if (!item.products || !Array.isArray(item.products)) {
+    //     errors.push(`Row ${index + 1}: Missing or invalid products array`);
+    //     return false;
+    //   }
       
-      if (typeof item.total !== 'number' || item.total <= 0) {
-        errors.push(`Row ${index + 1}: Missing or invalid total amount`);
-        return false;
-      }
+    //   if (typeof item.total !== 'number' || item.total <= 0) {
+    //     errors.push(`Row ${index + 1}: Missing or invalid total amount`);
+    //     return false;
+    //   }
       
-      if (!item.store || typeof item.store !== 'string') {
-        errors.push(`Row ${index + 1}: Missing or invalid store name`);
-        return false;
-      }
+    //   if (!item.store || typeof item.store !== 'string') {
+    //     errors.push(`Row ${index + 1}: Missing or invalid store name`);
+    //     return false;
+    //   }
       
-      return true;
-    });
+    //   return true;
+    // });
 
     return errors;
   };

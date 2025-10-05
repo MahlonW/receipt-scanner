@@ -19,11 +19,11 @@ export function areReceiptsSimilar(receipt1: ReceiptData, receipt2: ReceiptData)
   }
   
   // Additional similarity checks
-  const storeMatch = receipt1.store && receipt2.store && 
-    receipt1.store.toLowerCase() === receipt2.store.toLowerCase();
+  const storeMatch = !!(receipt1.store && receipt2.store && 
+    receipt1.store.toLowerCase() === receipt2.store.toLowerCase());
   
-  const dateMatch = receipt1.date && receipt2.date && 
-    receipt1.date === receipt2.date;
+  const dateMatch = !!(receipt1.date && receipt2.date && 
+    receipt1.date === receipt2.date);
   
   const totalMatch = Math.abs((receipt1.total || 0) - (receipt2.total || 0)) < 0.01; // Within 1 cent
   

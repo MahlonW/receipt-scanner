@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, Download, FileSpreadsheet, FileUp, History, Copy, AlertTriangle, X, FileImage, Store, Calendar, Package, Zap, Trash2 } from 'lucide-react';
-import { Product, ReceiptData } from '@/types/product';
-import { processReceipts, findDuplicates, areReceiptsSimilar } from '@/utils/receiptUtils';
+import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, FileSpreadsheet, History, AlertTriangle, X, FileImage, Store, Calendar, Package, Zap, Trash2 } from 'lucide-react';
+import { ReceiptData } from '@/types/product';
+import { processReceipts, findDuplicates } from '@/utils/receiptUtils';
 
 export default function Home() {
   const [image, setImage] = useState<File | null>(null);

@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const workbook = XLSX.utils.book_new();
 
     // Prepare products data for Excel from all receipts
-    const productsData: any[] = [];
+    const productsData: Record<string, string | number>[] = [];
     let itemCounter = 1;
     
     for (const receipt of receipts) {

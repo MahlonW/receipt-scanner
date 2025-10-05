@@ -9,11 +9,6 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
   
-  // Experimental features
-  experimental: {
-    // Enable server components
-    serverComponentsExternalPackages: ['xlsx'],
-  },
 };
 
 export default nextConfig;
