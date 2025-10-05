@@ -5,7 +5,7 @@ A Next.js application that uses AI to extract product information from receipt a
 ## Features
 
 - Upload receipt or invoice images
-- AI-powered text extraction using OpenAI's GPT-4o-mini
+- AI-powered text extraction using OpenAI's GPT-5-nano
 - Extract product details including name, price, quantity, category, and description
 - Display receipt totals, tax, subtotal, store name, and date
 - Modern, responsive UI with Tailwind CSS
