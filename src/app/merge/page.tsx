@@ -179,7 +179,7 @@ export default function MergePage() {
               <ArrowLeft className="h-5 w-5 text-gray-600" />
             </Link>
             <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-600 to-green-700 rounded-full shadow-lg">
-              <FileSpreadsheet className="h-6 w-6 text-white" />
+              <img src="/logo.svg" alt="Receipt Scanner" className="h-6 w-6" />
             </div>
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent mb-2">

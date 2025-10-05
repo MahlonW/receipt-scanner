@@ -1,0 +1,20 @@
+{
+  "name": "Receipt Scanner - AI-Powered Receipt Analysis",
+  "short_name": "Receipt Scanner",
+  "description": "Upload receipt images and get detailed product analysis with AI. Export to Excel, track expenses, and manage your receipts effortlessly.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business", "finance"],
+  "lang": "en-US"
+}
