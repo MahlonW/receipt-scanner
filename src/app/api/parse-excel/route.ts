@@ -4,9 +4,16 @@ import { ReceiptData } from '@/types/product';
 import { processReceipts } from '@/utils/receiptUtils';
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  const requestId = Math.random().toString(36).substring(7);
+  
+  console.log(`[${requestId}] [PARSE-EXCEL] Starting Excel file parsing`);
+  
   try {
     const formData = await request.formData();
     const excelFile = formData.get('excel') as File;
+    
+    console.log(`[${requestId}] [PARSE-EXCEL] File: ${excelFile?.name}, size: ${excelFile?.size} bytes`);
     
     if (!excelFile) {
       return Response.json({ error: 'No Excel file provided' }, { status: 400 });
@@ -107,11 +114,14 @@ export async function POST(request: NextRequest) {
     // Process receipts to assign IDs and mark as from Excel
     const processedReceipts = processReceipts(receipts, 'excel');
     
-    // Excel parsing completed
+    const duration = Date.now() - startTime;
+    console.log(`[${requestId}] [PARSE-EXCEL] Excel parsing completed successfully in ${duration}ms`);
+    console.log(`[${requestId}] [PARSE-EXCEL] Parsed ${processedReceipts.length} receipts from Excel file`);
     
     return Response.json(processedReceipts);
   } catch (error) {
-    console.error('Error parsing Excel file:', error);
+    const duration = Date.now() - startTime;
+    console.error(`[${requestId}] [PARSE-EXCEL] Error after ${duration}ms:`, error);
     return Response.json(
       { error: 'Failed to parse Excel file' },
       { status: 500 }

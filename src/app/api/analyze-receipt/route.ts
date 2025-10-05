@@ -20,9 +20,16 @@ const receiptSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
+  const requestId = Math.random().toString(36).substring(7);
+  
+  console.log(`[${requestId}] [ANALYZE-RECEIPT] Starting receipt analysis`);
+  
   try {
     const formData = await request.formData();
     const image = formData.get('image') as File;
+    
+    console.log(`[${requestId}] [ANALYZE-RECEIPT] Image file: ${image?.name}, size: ${image?.size} bytes`);
     
     if (!image) {
       return Response.json({ error: 'No image provided' }, { status: 400 });
@@ -35,6 +42,9 @@ export async function POST(request: Request) {
     const dataUrl = `data:${mimeType};base64,${base64}`;
 
     const modelName = process.env.OPENAI_MODEL || 'gpt-5-nano';
+    
+    console.log(`[${requestId}] [ANALYZE-RECEIPT] Using model: ${modelName}`);
+    console.log(`[${requestId}] [ANALYZE-RECEIPT] Calling OpenAI API...`);
     
     const result = await generateObject({
       model: openai(modelName), // Configurable model via environment variable
@@ -57,6 +67,9 @@ export async function POST(request: Request) {
     });
 
     const { object, usage } = result;
+    
+    console.log(`[${requestId}] [ANALYZE-RECEIPT] OpenAI API call completed successfully`);
+    console.log(`[${requestId}] [ANALYZE-RECEIPT] Extracted ${object.products.length} products from receipt`);
         
     // Extract token usage with proper property access
     const usageData = usage as Record<string, unknown>;
@@ -95,6 +108,10 @@ export async function POST(request: Request) {
       finalCompletionTokens = Math.floor(totalTokens * 0.2);
     }
 
+    const duration = Date.now() - startTime;
+    console.log(`[${requestId}] [ANALYZE-RECEIPT] Request completed successfully in ${duration}ms`);
+    console.log(`[${requestId}] [ANALYZE-RECEIPT] Token usage: ${finalPromptTokens} prompt + ${finalCompletionTokens} completion = ${totalTokens} total`);
+    
     return Response.json({
       ...object,
       tokenUsage: {
@@ -105,7 +122,8 @@ export async function POST(request: Request) {
       }
     });
   } catch (error) {
-    console.error('Error analyzing receipt:', error);
+    const duration = Date.now() - startTime;
+    console.error(`[${requestId}] [ANALYZE-RECEIPT] Error after ${duration}ms:`, error);
     
     // Provide more specific error messages
     let errorMessage = 'Failed to analyze receipt';

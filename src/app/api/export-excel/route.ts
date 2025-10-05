@@ -3,8 +3,15 @@ import * as XLSX from 'xlsx';
 import { ReceiptData } from '@/types/product';
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  const requestId = Math.random().toString(36).substring(7);
+  
+  console.log(`[${requestId}] [EXPORT-EXCEL] Starting Excel export`);
+  
   try {
     const { receipts }: { receipts: ReceiptData[] } = await request.json();
+    
+    console.log(`[${requestId}] [EXPORT-EXCEL] Exporting ${receipts.length} receipts`);
     
     if (!receipts || !Array.isArray(receipts)) {
       return Response.json({ error: 'Invalid receipts data' }, { status: 400 });
@@ -155,6 +162,10 @@ export async function POST(request: NextRequest) {
     const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
     const filename = `receipts-${receipts.length}-receipts-${timestamp}.xlsx`;
 
+    const duration = Date.now() - startTime;
+    console.log(`[${requestId}] [EXPORT-EXCEL] Excel file generated successfully in ${duration}ms`);
+    console.log(`[${requestId}] [EXPORT-EXCEL] File size: ${excelBuffer.length} bytes, filename: ${filename}`);
+
     return new Response(excelBuffer, {
       status: 200,
       headers: {
@@ -164,7 +175,8 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error generating Excel file:', error);
+    const duration = Date.now() - startTime;
+    console.error(`[${requestId}] [EXPORT-EXCEL] Error after ${duration}ms:`, error);
     return Response.json(
       { error: 'Failed to generate Excel file' },
       { status: 500 }
