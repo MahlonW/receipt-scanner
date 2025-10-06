@@ -28,8 +28,10 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const image = formData.get('image') as File;
+    const customCategories = formData.get('customCategories') as string;
     
     console.log(`[${requestId}] [ANALYZE-RECEIPT] Image file: ${image?.name}, size: ${image?.size} bytes`);
+    console.log(`[${requestId}] [ANALYZE-RECEIPT] Custom categories: ${customCategories || 'none'}`);
     
     if (!image) {
       return Response.json({ error: 'No image provided' }, { status: 400 });
@@ -46,16 +48,29 @@ export async function POST(request: Request) {
     console.log(`[${requestId}] [ANALYZE-RECEIPT] Using model: ${modelName}`);
     console.log(`[${requestId}] [ANALYZE-RECEIPT] Calling OpenAI API...`);
     
+    // Build the prompt with custom categories if provided
+    let promptText = 'Analyze this receipt or invoice image and extract all products with their details. For each product, provide: name (string), price (number), quantity (number, optional), category (string, optional), and description (string, optional). Also extract: total (number), tax (number, optional), subtotal (number, optional), store (string, optional), and date (string, optional).';
+    
+    if (customCategories && customCategories.trim()) {
+      const categories = customCategories.split(',').map(cat => cat.trim()).filter(cat => cat.length > 0);
+      if (categories.length > 0) {
+        promptText += ` When categorizing products, use ONLY these custom categories: ${categories.join(', ')}. Choose the most appropriate category from this list for each product.`;
+      }
+    }
+    
+    promptText += ' Return ONLY valid JSON that matches the required schema - do not include any text outside the JSON structure.';
+    
     const result = await generateObject({
-      model: openai(modelName), // Configurable model via environment variable
+      model: openai(modelName),
       schema: receiptSchema,
+      temperature: 1.0, // GPT-5 nano requires temperature: 1.0
       messages: [
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: 'Analyze this receipt or invoice image and extract all products with their details. For each product, provide: name (string), price (number), quantity (number, optional), category (string, optional), and description (string, optional). Also extract: total (number), tax (number, optional), subtotal (number, optional), store (string, optional), and date (string, optional). Return ONLY valid JSON that matches the required schema - do not include any text outside the JSON structure.',
+              text: promptText,
             },
             {
               type: 'image',

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import * as XLSX from 'xlsx';
 import { ReceiptData } from '@/types/product';
+import { APP_CONFIG } from '@/config';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -150,6 +151,23 @@ export async function POST(request: NextRequest) {
     const summarySheet = XLSX.utils.json_to_sheet(summaryData);
     summarySheet['!cols'] = [{ wch: 15 }, { wch: 20 }];
     XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+
+    // Create settings worksheet
+    const settingsData = [
+      { 'Setting': 'Custom Categories', 'Value': 'food, work, home, furniture, electronics, clothing, health, entertainment, travel, other', 'Description': 'Comma-separated list of custom categories for AI to use when analyzing receipts' },
+      { 'Setting': 'Default Currency', 'Value': 'Dollar', 'Description': 'Default currency symbol for price formatting' },
+      { 'Setting': 'Date Format', 'Value': 'MM/DD/YYYY', 'Description': 'Preferred date format for receipt dates' },
+      { 'Setting': 'Tax Rate', 'Value': '0.00', 'Description': 'Default tax rate (as decimal, e.g., 0.08 for 8%)' },
+      { 'Setting': 'Auto-categorize', 'Value': 'true', 'Description': 'Whether to automatically categorize products using AI' },
+      { 'Setting': 'Include Descriptions', 'Value': 'true', 'Description': 'Whether to generate product descriptions using AI' },
+      { 'Setting': 'Duplicate Detection', 'Value': 'true', 'Description': 'Whether to detect and mark duplicate receipts' },
+      { 'Setting': 'Export Format', 'Value': 'detailed', 'Description': 'Export format: detailed, summary, or minimal' },
+      { 'Setting': 'Receipt Scanner Version', 'Value': APP_CONFIG.VERSION, 'Description': 'Version of the receipt scanner application' }
+    ];
+
+    const settingsSheet = XLSX.utils.json_to_sheet(settingsData);
+    settingsSheet['!cols'] = [{ wch: 25 }, { wch: 50 }, { wch: 60 }];
+    XLSX.utils.book_append_sheet(workbook, settingsSheet, 'Settings');
 
     // Generate Excel file buffer
     const excelBuffer = XLSX.write(workbook, { 

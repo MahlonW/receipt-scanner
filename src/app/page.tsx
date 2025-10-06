@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, FileSpreadsheet, History, AlertTriangle, X, FileImage, Store, Calendar, Package, Zap, Trash2, LogOut, Moon, Sun } from 'lucide-react';
+import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, FileSpreadsheet, History, AlertTriangle, X, FileImage, Store, Calendar, Package, Zap, Trash2, LogOut, Moon, Sun, Settings } from 'lucide-react';
 import { ReceiptData } from '@/types/product';
 import { processReceipts, findDuplicates } from '@/utils/receiptUtils';
 import { useDarkMode } from '@/contexts/DarkModeContext';
-import { CardSkeleton, ButtonSkeleton, ReceiptCardSkeleton, UploadAreaSkeleton, HeaderSkeleton } from '@/components/LoadingSkeleton';
-import SlidingFade from '@/components/SlidingFade';
+import { CardSkeleton, ReceiptCardSkeleton, UploadAreaSkeleton, HeaderSkeleton } from '@/components/LoadingSkeleton';
+import { UserSettings, parseSettingsFromExcel, getDefaultSettings } from '@/utils/settingsUtils';
+import SettingsModal from '@/components/SettingsModal';
+import VersionConfirmModal from '@/components/VersionConfirmModal';
+import { APP_CONFIG, VersionManager } from '@/config';
 
 export default function Home() {
   const [image, setImage] = useState<File | null>(null);
@@ -32,12 +35,23 @@ export default function Home() {
   const [allReceipts, setAllReceipts] = useState<ReceiptData[]>([]);
   const [autoClearImages, setAutoClearImages] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [userSettings, setUserSettings] = useState<UserSettings>(getDefaultSettings());
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showVersionModal, setShowVersionModal] = useState(false);
+  const [versionCompatibility, setVersionCompatibility] = useState<{
+    compatible: boolean;
+    type: 'major' | 'minor' | 'patch' | 'same';
+    message: string;
+  } | null>(null);
+  const [pendingExcelFile, setPendingExcelFile] = useState<File | null>(null);
+  const [fileVersion, setFileVersion] = useState<string>('1.0.0');
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
-  // Load cached receipts on component mount
+  // Load cached receipts and settings on component mount
   useEffect(() => {
     const loadInitialData = async () => {
       try {
+        // Load cached receipts
         const cached = localStorage.getItem('receipt-scanner-cache');
         if (cached) {
           const parsed = JSON.parse(cached);
@@ -48,8 +62,15 @@ export default function Home() {
           setExistingData(excelReceipts);
           setCachedReceipts(otherReceipts);
         }
+
+        // Load saved settings
+        const savedSettings = localStorage.getItem('receipt-scanner-settings');
+        if (savedSettings) {
+          const parsedSettings = JSON.parse(savedSettings);
+          setUserSettings(parsedSettings);
+        }
       } catch (error) {
-        console.error('Error loading cached receipts:', error);
+        console.error('Error loading cached data:', error);
       } finally {
         // Simulate loading time for better UX
         setTimeout(() => {
@@ -121,6 +142,107 @@ export default function Home() {
       window.location.href = '/login';
     } catch (error) {
       console.error('Logout failed:', error);
+    }
+  };
+
+  const handleSaveSettings = (newSettings: UserSettings) => {
+    setUserSettings(newSettings);
+    // Save settings to localStorage for persistence
+    localStorage.setItem('receipt-scanner-settings', JSON.stringify(newSettings));
+  };
+
+  const handleExportSettings = async () => {
+    try {
+      const response = await fetch('/api/export-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ settings: userSettings }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to export settings');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt-scanner-settings-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to export settings');
+    }
+  };
+
+  const checkVersionCompatibility = (fileSettings: UserSettings) => {
+    const fileVer = fileSettings.version || '1.0.0';
+    setFileVersion(fileVer);
+    const compatibility = VersionManager.isCompatible(APP_CONFIG.VERSION, fileVer);
+    
+    if (VersionManager.shouldShowWarning(compatibility)) {
+      setVersionCompatibility(compatibility);
+      return false; // Need user confirmation
+    }
+    
+    return true; // Safe to proceed
+  };
+
+  const handleVersionConfirm = () => {
+    setShowVersionModal(false);
+    setVersionCompatibility(null);
+    
+    if (pendingExcelFile) {
+      processExcelFile(pendingExcelFile);
+      setPendingExcelFile(null);
+    }
+  };
+
+  const handleVersionCancel = () => {
+    setShowVersionModal(false);
+    setVersionCompatibility(null);
+    setPendingExcelFile(null);
+  };
+
+  const processExcelFile = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('excel', file);
+
+      const response = await fetch('/api/parse-excel', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to parse Excel file');
+      }
+
+      const data = await response.json();
+      
+      // Process receipts to assign IDs and mark as from Excel
+      const processedData = processReceipts(data, 'excel');
+      
+      // Parse settings from the Excel file
+      const fileBuffer = await file.arrayBuffer();
+      const settings = parseSettingsFromExcel(fileBuffer);
+      if (settings.customCategories && settings.customCategories.length > 0) {
+        setUserSettings(prev => ({ ...prev, ...settings }));
+      }
+      
+      // Append to existing data instead of replacing
+      setExistingData(prevData => {
+        const newData = [...prevData, ...processedData];
+        return newData;
+      });
+      
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to process Excel file');
     }
   };
 
@@ -216,6 +338,11 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append('image', image);
+      
+      // Add custom categories if available
+      if (userSettings.customCategories && userSettings.customCategories.length > 0) {
+        formData.append('customCategories', userSettings.customCategories.join(', '));
+      }
 
       const response = await fetch('/api/analyze-receipt', {
         method: 'POST',
@@ -273,6 +400,11 @@ export default function Home() {
         
         const formData = new FormData();
         formData.append('image', images[i]);
+        
+        // Add custom categories if available
+        if (userSettings.customCategories && userSettings.customCategories.length > 0) {
+          formData.append('customCategories', userSettings.customCategories.join(', '));
+        }
 
         const response = await fetch('/api/analyze-receipt', {
           method: 'POST',
@@ -327,37 +459,21 @@ export default function Home() {
     if (!file) return;
 
     try {
-      const formData = new FormData();
-      formData.append('excel', file);
-
-      const response = await fetch('/api/parse-excel', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to parse Excel file');
+      // First, check version compatibility
+      const fileBuffer = await file.arrayBuffer();
+      const settings = parseSettingsFromExcel(fileBuffer);
+      
+      if (!checkVersionCompatibility(settings)) {
+        // Version check failed, show modal and store file for later processing
+        setPendingExcelFile(file);
+        setShowVersionModal(true);
+        return;
       }
-
-      const data = await response.json();
-      // Excel upload - processing data
       
-      // Process receipts to assign IDs and mark as from Excel
-      const processedData = processReceipts(data, 'excel');
-      // Excel upload - processed data
-      
-      // Append to existing data instead of replacing
-      setExistingData(prevData => {
-        const newData = [...prevData, ...processedData];
-        // Excel upload - updated existing data
-        return newData;
-      });
-      
-      // Don't call saveToCache here - let updateAllReceipts handle the caching
-      
-      setError(null);
+      // Version check passed, process the file
+      await processExcelFile(file);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to parse Excel file');
+      setError(err instanceof Error ? err.message : 'Failed to process Excel file');
     }
   };
 
@@ -459,6 +575,41 @@ export default function Home() {
             Transform your receipts into organized data with AI-powered analysis
           </p>
           
+          {/* Settings Display */}
+          {userSettings.customCategories && userSettings.customCategories.length > 0 && (
+            <div className={`mb-6 p-4 rounded-xl border transition-colors duration-300 ${
+              isDarkMode 
+                ? 'bg-gray-800/60 border-gray-700' 
+                : 'bg-white/80 border-white/20'
+            }`}>
+              <h3 className={`text-lg font-semibold mb-2 flex items-center gap-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-800'
+              }`}>
+                <Package className="h-5 w-5 text-blue-600" />
+                Custom Categories
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {userSettings.customCategories.map((category, index) => (
+                  <span
+                    key={index}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors duration-300 ${
+                      isDarkMode 
+                        ? 'bg-blue-900/50 text-blue-300' 
+                        : 'bg-blue-100 text-blue-700'
+                    }`}
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
+              <p className={`text-sm mt-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                AI will use these categories when analyzing receipts
+              </p>
+            </div>
+          )}
+
           {/* Action buttons */}
           <div className="flex flex-wrap justify-center gap-4 mb-8">
             <button
@@ -469,13 +620,21 @@ export default function Home() {
               {showHistory ? 'Hide' : 'Show'} History ({cachedReceipts.length})
             </button>
             
-            <button
-              onClick={handleLogout}
-              className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
-            >
-              <LogOut className="h-5 w-5" />
-              Logout
-            </button>
+                    <button
+                      onClick={() => setShowSettingsModal(true)}
+                      className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
+                    >
+                      <Settings className="h-5 w-5" />
+                      Settings
+                    </button>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      Logout
+                    </button>
             
             {/* Auto-clear images toggle */}
             <div className={`flex items-center gap-3 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg border transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 ${
@@ -1212,8 +1371,29 @@ export default function Home() {
               </div>
             </div>
           </div>
-        )}
-      </div>
+                )}
+
+            {/* Settings Modal */}
+            <SettingsModal
+              isOpen={showSettingsModal}
+              onClose={() => setShowSettingsModal(false)}
+              settings={userSettings}
+              onSave={handleSaveSettings}
+              onExportSettings={handleExportSettings}
+            />
+
+            {/* Version Confirmation Modal */}
+            {versionCompatibility && (
+              <VersionConfirmModal
+                isOpen={showVersionModal}
+                onClose={handleVersionCancel}
+                onConfirm={handleVersionConfirm}
+                appVersion={APP_CONFIG.VERSION}
+                fileVersion={fileVersion}
+                compatibility={versionCompatibility}
+              />
+            )}
+          </div>
     </div>
   );
 }
