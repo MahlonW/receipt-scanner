@@ -74,6 +74,24 @@ export async function POST(request: NextRequest) {
     settingsSheet['!cols'] = [{ wch: 25 }, { wch: 50 }, { wch: 60 }];
     XLSX.utils.book_append_sheet(workbook, settingsSheet, 'Settings');
 
+    // Hide the Settings sheet using SheetJS visibility feature
+    // Reference: https://docs.sheetjs.com/docs/csf/features/visibility
+    if (!workbook.Workbook) workbook.Workbook = {};
+    if (!workbook.Workbook.Sheets) workbook.Workbook.Sheets = [];
+    
+    // Find the Settings sheet index
+    const settingsIndex = workbook.SheetNames.indexOf('Settings');
+    if (settingsIndex !== -1) {
+      // Ensure the metadata array is large enough
+      while (workbook.Workbook.Sheets.length <= settingsIndex) {
+        workbook.Workbook.Sheets.push({});
+      }
+      
+      // Set the Settings sheet as hidden (value 1 = Hidden)
+      // This makes it accessible via "Unhide" menu but not visible by default
+      workbook.Workbook.Sheets[settingsIndex].Hidden = 1;
+    }
+
     // Generate Excel file buffer
     const excelBuffer = XLSX.write(workbook, { 
       type: 'buffer', 

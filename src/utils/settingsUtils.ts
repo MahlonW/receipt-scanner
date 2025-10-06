@@ -16,12 +16,24 @@ export interface UserSettings {
 export function parseSettingsFromExcel(buffer: ArrayBuffer): UserSettings {
   try {
     const workbook = XLSX.read(buffer, { type: 'buffer' });
-    const settingsSheet = workbook.Sheets['Settings'];
     
-    if (!settingsSheet) {
+    // Check if Settings sheet exists (including hidden sheets)
+    // Reference: https://docs.sheetjs.com/docs/csf/features/visibility
+    const settingsSheetName = 'Settings';
+    const settingsIndex = workbook.SheetNames.indexOf(settingsSheetName);
+    
+    if (settingsIndex === -1) {
       console.log('No Settings sheet found in Excel file');
       return {};
     }
+    
+    // Check if the sheet is hidden and log it for debugging
+    const isHidden = workbook?.Workbook?.Sheets?.[settingsIndex]?.Hidden || 0;
+    if (isHidden) {
+      console.log(`Settings sheet is hidden (visibility: ${isHidden})`);
+    }
+    
+    const settingsSheet = workbook.Sheets[settingsSheetName];
     
     const settingsData = XLSX.utils.sheet_to_json(settingsSheet) as Array<{
       Setting: string;
@@ -90,4 +102,33 @@ export function getDefaultSettings(): UserSettings {
     exportFormat: 'detailed',
     version: APP_CONFIG.VERSION
   };
+}
+
+/**
+ * Check if a sheet is visible in the workbook
+ * Reference: https://docs.sheetjs.com/docs/csf/features/visibility
+ */
+export function isSheetVisible(workbook: { SheetNames: string[]; Workbook?: { Sheets?: Array<{ Hidden?: number }> } }, sheetName: string): boolean {
+  const idx = workbook.SheetNames.indexOf(sheetName);
+  if (idx === -1) return false;
+  
+  const hidden = workbook?.Workbook?.Sheets?.[idx]?.Hidden || 0;
+  return hidden === 0; // 0 = Visible, 1 = Hidden, 2 = Very Hidden
+}
+
+/**
+ * Get sheet visibility status
+ * Reference: https://docs.sheetjs.com/docs/csf/features/visibility
+ */
+export function getSheetVisibility(workbook: { SheetNames: string[]; Workbook?: { Sheets?: Array<{ Hidden?: number }> } }, sheetName: string): 'visible' | 'hidden' | 'very-hidden' {
+  const idx = workbook.SheetNames.indexOf(sheetName);
+  if (idx === -1) return 'visible';
+  
+  const hidden = workbook?.Workbook?.Sheets?.[idx]?.Hidden || 0;
+  switch (hidden) {
+    case 0: return 'visible';
+    case 1: return 'hidden';
+    case 2: return 'very-hidden';
+    default: return 'visible';
+  }
 }

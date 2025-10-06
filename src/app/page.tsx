@@ -7,7 +7,7 @@ import { ReceiptData } from '@/types/product';
 import { processReceipts, findDuplicates } from '@/utils/receiptUtils';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import { CardSkeleton, ReceiptCardSkeleton, UploadAreaSkeleton, HeaderSkeleton } from '@/components/LoadingSkeleton';
-import { UserSettings, parseSettingsFromExcel, getDefaultSettings } from '@/utils/settingsUtils';
+import { UserSettings, parseSettingsFromExcel, getDefaultSettings, getSheetVisibility } from '@/utils/settingsUtils';
 import SettingsModal from '@/components/SettingsModal';
 import VersionConfirmModal from '@/components/VersionConfirmModal';
 import { APP_CONFIG, VersionManager } from '@/config';
@@ -230,6 +230,16 @@ export default function Home() {
       // Parse settings from the Excel file
       const fileBuffer = await file.arrayBuffer();
       const settings = parseSettingsFromExcel(fileBuffer);
+      
+      // Check sheet visibility for debugging
+      const XLSX = await import('xlsx');
+      const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+      const settingsVisibility = getSheetVisibility(workbook, 'Settings');
+      
+      if (settingsVisibility !== 'visible') {
+        console.log(`Settings sheet is ${settingsVisibility} in uploaded file`);
+      }
+      
       if (settings.customCategories && settings.customCategories.length > 0) {
         setUserSettings(prev => ({ ...prev, ...settings }));
       }
