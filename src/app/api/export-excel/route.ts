@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   console.log(`[${requestId}] [EXPORT-EXCEL] Starting Excel export`);
   
   try {
-    const { receipts }: { receipts: ReceiptData[] } = await request.json();
+    const { receipts, existingWorkbook }: { receipts: ReceiptData[]; existingWorkbook?: ArrayBuffer } = await request.json();
     
     console.log(`[${requestId}] [EXPORT-EXCEL] Exporting ${receipts.length} receipts`);
     
@@ -18,8 +18,16 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Invalid receipts data' }, { status: 400 });
     }
 
-    // Create a new workbook
-    const workbook = XLSX.utils.book_new();
+    // Create a new workbook or use existing one
+    let workbook;
+    if (existingWorkbook) {
+      // Parse existing workbook to preserve all existing sheets
+      workbook = XLSX.read(existingWorkbook, { type: 'buffer' });
+      console.log(`[${requestId}] [EXPORT-EXCEL] Preserving existing workbook with ${workbook.SheetNames.length} sheets`);
+    } else {
+      // Create a new workbook
+      workbook = XLSX.utils.book_new();
+    }
 
     // Prepare products data for Excel from all receipts
     const productsData: Record<string, string | number>[] = [];
@@ -109,7 +117,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create products worksheet
+    // Create or update products worksheet (preserve existing if it exists)
     const productsSheet = XLSX.utils.json_to_sheet(productsData);
     
     // Set column widths
@@ -124,7 +132,12 @@ export async function POST(request: NextRequest) {
     ];
     productsSheet['!cols'] = colWidths;
 
-    XLSX.utils.book_append_sheet(workbook, productsSheet, 'Products');
+    // Only update our specific sheets, preserve all others
+    if (workbook.SheetNames.includes('Products')) {
+      workbook.Sheets['Products'] = productsSheet;
+    } else {
+      XLSX.utils.book_append_sheet(workbook, productsSheet, 'Products');
+    }
 
     // Create summary worksheet
     const summaryData = [
@@ -150,7 +163,13 @@ export async function POST(request: NextRequest) {
 
     const summarySheet = XLSX.utils.json_to_sheet(summaryData);
     summarySheet['!cols'] = [{ wch: 15 }, { wch: 20 }];
-    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+    
+    // Only update our specific sheets, preserve all others
+    if (workbook.SheetNames.includes('Summary')) {
+      workbook.Sheets['Summary'] = summarySheet;
+    } else {
+      XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+    }
 
     // Create settings worksheet
     const settingsData = [
@@ -167,7 +186,13 @@ export async function POST(request: NextRequest) {
 
     const settingsSheet = XLSX.utils.json_to_sheet(settingsData);
     settingsSheet['!cols'] = [{ wch: 25 }, { wch: 50 }, { wch: 60 }];
-    XLSX.utils.book_append_sheet(workbook, settingsSheet, 'Settings');
+    
+    // Only update our specific sheets, preserve all others
+    if (workbook.SheetNames.includes('Settings')) {
+      workbook.Sheets['Settings'] = settingsSheet;
+    } else {
+      XLSX.utils.book_append_sheet(workbook, settingsSheet, 'Settings');
+    }
 
     // Hide the Settings sheet using SheetJS visibility feature
     // Reference: https://docs.sheetjs.com/docs/csf/features/visibility

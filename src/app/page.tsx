@@ -495,6 +495,8 @@ export default function Home() {
       // Use the deduplicated receipts
       const allData = allReceipts;
       
+      // TODO: In the future, we could add support for updating existing Excel files
+      // by allowing users to upload an existing file and then export to it
       const response = await fetch('/api/export-excel', {
         method: 'POST',
         headers: {

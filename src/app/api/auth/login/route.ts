@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
     
     // Set authentication cookie
     const response = NextResponse.json({ success: true });
-    response.cookies.set('app-auth', appPassword, {
+    // Use the provided password as the cookie value for authentication
+    response.cookies.set('app-auth', password, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

@@ -243,19 +243,24 @@ export default function MergePage() {
   };
 
   const downloadMerged = async () => {
-    if (mergedData.length === 0) return;
+    if (uploadedFiles.length === 0) return;
 
     try {
-      const response = await fetch('/api/export-excel', {
+      // Convert files to ArrayBuffers for proper workbook merging
+      const fileBuffers = await Promise.all(
+        uploadedFiles.map(file => file.arrayBuffer())
+      );
+
+      const response = await fetch('/api/merge-excel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ receipts: mergedData }),
+        body: JSON.stringify({ files: fileBuffers }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate Excel file');
+        throw new Error('Failed to merge Excel files');
       }
 
       const blob = await response.blob();

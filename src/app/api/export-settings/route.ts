@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   console.log(`[${requestId}] [EXPORT-SETTINGS] Starting settings export`);
   
   try {
-    const { settings }: { settings: UserSettings } = await request.json();
+    const { settings, existingWorkbook }: { settings: UserSettings; existingWorkbook?: ArrayBuffer } = await request.json();
     
     console.log(`[${requestId}] [EXPORT-SETTINGS] Exporting settings`);
     
@@ -18,8 +18,16 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Invalid settings data' }, { status: 400 });
     }
 
-    // Create a new workbook
-    const workbook = XLSX.utils.book_new();
+    // Create a new workbook or use existing one
+    let workbook;
+    if (existingWorkbook) {
+      // Parse existing workbook to preserve all existing sheets
+      workbook = XLSX.read(existingWorkbook, { type: 'buffer' });
+      console.log(`[${requestId}] [EXPORT-SETTINGS] Preserving existing workbook with ${workbook.SheetNames.length} sheets`);
+    } else {
+      // Create a new workbook
+      workbook = XLSX.utils.book_new();
+    }
 
     // Create settings worksheet
     const settingsData = [
@@ -72,7 +80,13 @@ export async function POST(request: NextRequest) {
 
     const settingsSheet = XLSX.utils.json_to_sheet(settingsData);
     settingsSheet['!cols'] = [{ wch: 25 }, { wch: 50 }, { wch: 60 }];
-    XLSX.utils.book_append_sheet(workbook, settingsSheet, 'Settings');
+    
+    // Only update our specific sheets, preserve all others
+    if (workbook.SheetNames.includes('Settings')) {
+      workbook.Sheets['Settings'] = settingsSheet;
+    } else {
+      XLSX.utils.book_append_sheet(workbook, settingsSheet, 'Settings');
+    }
 
     // Hide the Settings sheet using SheetJS visibility feature
     // Reference: https://docs.sheetjs.com/docs/csf/features/visibility
