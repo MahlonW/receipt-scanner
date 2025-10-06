@@ -177,41 +177,44 @@ export default function MergePage() {
     }`}>
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-3 mb-4">
+        <div className="text-center mb-8">
+          {/* Header with back button and dark mode toggle */}
+          <div className="flex justify-between items-center mb-8">
             <Link 
               href="/"
-              className={`p-2 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
+              className={`p-3 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 ${
                 isDarkMode 
                   ? 'bg-gray-800/60 hover:bg-gray-700/60' 
                   : 'bg-white/80 hover:bg-white/90'
               }`}
             >
-              <ArrowLeft className={`h-5 w-5 transition-colors duration-300 ${
+              <ArrowLeft className={`h-6 w-6 transition-colors duration-300 ${
                 isDarkMode ? 'text-gray-300' : 'text-gray-600'
               }`} />
             </Link>
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-600 to-green-700 rounded-full shadow-lg">
-              <img src="/logo.svg" alt="Receipt Scanner" className="h-6 w-6" />
+            <div className="text-center">
+              <h1 className={`text-5xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2 ${
+                isDarkMode ? 'text-white' : ''
+              }`}>
+                Merge Excel Files
+              </h1>
+              <div className={`w-24 h-1 bg-gradient-to-r from-green-500 to-teal-500 rounded-full mx-auto ${
+                isDarkMode ? 'opacity-80' : 'opacity-60'
+              }`}></div>
             </div>
             <button
               onClick={toggleDarkMode}
               className={`p-3 rounded-full transition-all duration-300 ${
                 isDarkMode 
-                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
-                  : 'bg-gray-800 hover:bg-gray-700 text-white'
-              } shadow-lg hover:shadow-xl transform hover:-translate-y-1`}
+                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white' 
+                  : 'bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 text-white'
+              } shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105`}
               title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
           </div>
-          <h1 className={`text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent mb-2 ${
-            isDarkMode ? 'text-white' : ''
-          }`}>
-            Merge Excel Files
-          </h1>
-          <p className={`transition-colors duration-300 ${
+          <p className={`text-xl mb-6 max-w-2xl mx-auto transition-colors duration-300 ${
             isDarkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
             Combine multiple Excel files into one organized spreadsheet
@@ -219,31 +222,31 @@ export default function MergePage() {
         </div>
 
         {/* File Upload */}
-        <div className={`backdrop-blur-sm rounded-xl shadow-lg p-6 mb-6 border transition-colors duration-300 ${
+        <div className={`backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-8 border transition-all duration-300 hover:shadow-3xl ${
           isDarkMode 
-            ? 'bg-gray-800/60 border-gray-700' 
-            : 'bg-white/90 border-white/20'
+            ? 'bg-gray-800/60 border-gray-700 hover:bg-gray-700/60' 
+            : 'bg-white/80 border-white/20 hover:bg-white/90'
         }`}>
-          <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors duration-300 ${
+          <div className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 hover:border-opacity-60 ${
             isDarkMode 
-              ? 'border-gray-600 bg-gradient-to-br from-gray-800/50 to-gray-700/50' 
-              : 'border-green-200 bg-gradient-to-br from-green-50 to-emerald-50'
+              ? 'border-gray-600 bg-gradient-to-br from-gray-800/50 to-gray-700/50 hover:from-gray-700/60 hover:to-gray-600/60' 
+              : 'border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100'
           }`}>
-            <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-4 shadow-lg">
-              <Upload className="h-5 w-5 text-white" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-full mb-6 shadow-xl">
+              <Upload className="h-8 w-8 text-white" />
             </div>
-            <h3 className={`text-lg font-bold mb-2 transition-colors duration-300 ${
+            <h3 className={`text-2xl font-bold mb-3 transition-colors duration-300 ${
               isDarkMode ? 'text-white' : 'text-gray-800'
             }`}>Upload Excel Files</h3>
-            <p className={`mb-4 transition-colors duration-300 ${
+            <p className={`text-lg mb-8 transition-colors duration-300 ${
               isDarkMode ? 'text-gray-300' : 'text-gray-600'
             }`}>Select multiple Excel files to merge</p>
             
             <label
               htmlFor="file-upload"
-              className="cursor-pointer bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-2 mx-auto w-fit shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="cursor-pointer bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-xl font-bold hover:from-green-600 hover:to-emerald-600 transition-all duration-300 flex items-center gap-3 mx-auto w-fit shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
             >
-              <Upload className="h-4 w-4" />
+              <Upload className="h-5 w-5" />
               Choose Excel Files
             </label>
             <input
@@ -288,20 +291,20 @@ export default function MergePage() {
                 ))}
               </div>
               
-              <div className="flex gap-3 mt-4">
+              <div className="flex gap-4 mt-6">
                 <button
                   onClick={mergeFiles}
                   disabled={loading}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:transform-none"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 disabled:transform-none disabled:hover:scale-100"
                 >
                   {loading ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Merging...
                     </>
                   ) : (
                     <>
-                      <FileSpreadsheet className="h-4 w-4" />
+                      <FileSpreadsheet className="h-5 w-5" />
                       Merge Files
                     </>
                   )}
@@ -309,9 +312,9 @@ export default function MergePage() {
                 
                 <button
                   onClick={clearAll}
-                  className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-8 py-4 rounded-xl font-bold hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                   Clear All
                 </button>
               </div>
@@ -382,9 +385,9 @@ export default function MergePage() {
               </div>
               <button
                 onClick={downloadMerged}
-                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-5 w-5" />
                 Download Merged File
               </button>
             </div>

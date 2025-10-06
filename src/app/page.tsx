@@ -400,56 +400,60 @@ export default function Home() {
     }`}>
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-8">
-          <div className="flex justify-center items-center gap-4 mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full shadow-lg">
-              <img src="/logo.svg" alt="Receipt Scanner" className="w-8 h-8" />
+          {/* Header with back button and dark mode toggle */}
+          <div className="flex justify-between items-center mb-8">
+            <div className="w-12"></div> {/* Spacer for centering */}
+            <div className="text-center">
+              <h1 className={`text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2 ${
+                isDarkMode ? 'text-white' : ''
+              }`}>
+                Receipt Scanner
+              </h1>
+              <div className={`w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto ${
+                isDarkMode ? 'opacity-80' : 'opacity-60'
+              }`}></div>
             </div>
             <button
               onClick={toggleDarkMode}
               className={`p-3 rounded-full transition-all duration-300 ${
                 isDarkMode 
-                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
-                  : 'bg-gray-800 hover:bg-gray-700 text-white'
-              } shadow-lg hover:shadow-xl transform hover:-translate-y-1`}
+                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white' 
+                  : 'bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 text-white'
+              } shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105`}
               title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
           </div>
-          <h1 className={`text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3 ${
-            isDarkMode ? 'text-white' : ''
-          }`}>
-            Receipt Scanner
-          </h1>
-          <p className={`text-lg mb-4 max-w-xl mx-auto transition-colors duration-300 ${
+          <p className={`text-xl mb-6 max-w-2xl mx-auto transition-colors duration-300 ${
             isDarkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
             Transform your receipts into organized data with AI-powered analysis
           </p>
           
           {/* Action buttons */}
-          <div className="flex flex-wrap justify-center gap-3 mb-6">
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
             >
-              <History className="h-4 w-4" />
+              <History className="h-5 w-5" />
               {showHistory ? 'Hide' : 'Show'} History ({cachedReceipts.length})
             </button>
             
             <button
               onClick={handleLogout}
-              className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-5 w-5" />
               Logout
             </button>
             
             {/* Auto-clear images toggle */}
-            <div className={`flex items-center gap-2 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border transition-colors duration-300 ${
+            <div className={`flex items-center gap-3 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg border transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 ${
               isDarkMode 
-                ? 'bg-gray-800/60 border-gray-700' 
-                : 'bg-white/80 border-white/20'
+                ? 'bg-gray-800/60 border-gray-700 hover:bg-gray-700/60' 
+                : 'bg-white/80 border-white/20 hover:bg-white/90'
             }`}>
               <input
                 type="checkbox"
@@ -458,9 +462,9 @@ export default function Home() {
                 onChange={(e) => {
                   setAutoClearImages(e.target.checked);
                 }}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded accent-blue-600"
+                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded accent-blue-600"
               />
-              <label htmlFor="auto-clear" className={`text-sm font-medium transition-colors duration-300 ${
+              <label htmlFor="auto-clear" className={`text-sm font-semibold transition-colors duration-300 ${
                 isDarkMode ? 'text-gray-300' : 'text-gray-700'
               }`}>
                 Auto-clear images
@@ -470,9 +474,9 @@ export default function Home() {
             {cachedReceipts.length > 0 && (
               <button
                 onClick={clearCache}
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-5 w-5" />
                 Clear Cache
               </button>
             )}
@@ -480,34 +484,34 @@ export default function Home() {
             {(cachedReceipts.length > 0 || existingData.length > 0 || batchResults.length > 0 || receiptData) && (
               <button
                 onClick={clearAllData}
-                className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg font-medium hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
                 Clear All Data
               </button>
             )}
           </div>
           
           {/* Excel upload */}
-          <div className="mb-6">
-            <div className={`backdrop-blur-sm rounded-xl p-4 shadow-lg border transition-colors duration-300 ${
+          <div className="mb-8">
+            <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-xl border transition-all duration-300 hover:shadow-2xl ${
               isDarkMode 
-                ? 'bg-gray-800/60 border-gray-700' 
-                : 'bg-white/80 border-white/20'
+                ? 'bg-gray-800/60 border-gray-700 hover:bg-gray-700/60' 
+                : 'bg-white/80 border-white/20 hover:bg-white/90'
             }`}>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <label
                   htmlFor="excel-upload"
-                  className="cursor-pointer bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  className="cursor-pointer bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
                 >
-                  <FileSpreadsheet className="h-5 w-5" />
+                  <FileSpreadsheet className="h-6 w-6" />
                   Upload Excel File
                 </label>
                 <Link
                   href="/merge"
-                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-4 rounded-xl font-bold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
                 >
-                  <FileSpreadsheet className="h-5 w-5" />
+                  <FileSpreadsheet className="h-6 w-6" />
                   Merge Excel Files
                 </Link>
               </div>
@@ -522,33 +526,33 @@ export default function Home() {
           </div>
         </div>
 
-        <div className={`backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6 border transition-colors duration-300 ${
+        <div className={`backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-8 border transition-all duration-300 hover:shadow-3xl ${
           isDarkMode 
-            ? 'bg-gray-800/60 border-gray-700' 
-            : 'bg-white/90 border-white/20'
+            ? 'bg-gray-800/60 border-gray-700 hover:bg-gray-700/60' 
+            : 'bg-white/90 border-white/20 hover:bg-white/95'
         }`}>
-          <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors duration-300 ${
+          <div className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 hover:border-opacity-60 ${
             isDarkMode 
-              ? 'border-gray-600 bg-gradient-to-br from-gray-800/50 to-gray-700/50' 
-              : 'border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50'
+              ? 'border-gray-600 bg-gradient-to-br from-gray-800/50 to-gray-700/50 hover:from-gray-700/60 hover:to-gray-600/60' 
+              : 'border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100'
           }`}>
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-4 shadow-lg">
-              <Upload className="h-6 w-6 text-white" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 rounded-full mb-6 shadow-xl">
+              <Upload className="h-8 w-8 text-white" />
             </div>
-            <h3 className={`text-xl font-bold mb-2 transition-colors duration-300 ${
+            <h3 className={`text-2xl font-bold mb-3 transition-colors duration-300 ${
               isDarkMode ? 'text-white' : 'text-gray-800'
             }`}>Upload Your Receipts</h3>
-            <p className={`mb-6 transition-colors duration-300 ${
+            <p className={`text-lg mb-8 transition-colors duration-300 ${
               isDarkMode ? 'text-gray-300' : 'text-gray-600'
             }`}>Choose single or multiple receipt upload</p>
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <div>
                   <label
                     htmlFor="image-upload"
-                    className="cursor-pointer bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    className="cursor-pointer bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
                   >
-                    <Upload className="h-4 w-4" />
+                    <Upload className="h-5 w-5" />
                     Single Image
                   </label>
                   <input
@@ -558,13 +562,13 @@ export default function Home() {
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-        </div>
+                </div>
                 <div>
                   <label
                     htmlFor="multiple-image-upload"
-                    className="cursor-pointer bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    className="cursor-pointer bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-4 rounded-xl font-bold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
                   >
-                    <Upload className="h-4 w-4" />
+                    <Upload className="h-5 w-5" />
                     Multiple Images
                   </label>
                   <input
@@ -672,21 +676,21 @@ export default function Home() {
           </div>
 
           {/* Action buttons */}
-          <div className="mt-6 text-center space-y-4">
+          <div className="mt-8 text-center space-y-6">
             {image && (
               <button
                 onClick={analyzeReceipt}
                 disabled={loading}
-                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-10 py-4 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 mx-auto shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:transform-none"
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-12 py-5 rounded-2xl font-bold hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-4 mx-auto shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105 disabled:transform-none disabled:hover:scale-100"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-6 w-6 animate-spin" />
                     Analyzing...
                   </>
                 ) : (
                   <>
-                    <Receipt className="h-5 w-5" />
+                    <Receipt className="h-6 w-6" />
                     Analyze Single Receipt
                   </>
                 )}
@@ -694,27 +698,29 @@ export default function Home() {
             )}
             
             {images.length > 0 && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <button
                   onClick={analyzeBatch}
                   disabled={batchLoading}
-                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-10 py-4 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 mx-auto shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:transform-none"
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-12 py-5 rounded-2xl font-bold hover:from-purple-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-4 mx-auto shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105 disabled:transform-none disabled:hover:scale-100"
                 >
                   {batchLoading ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="h-6 w-6 animate-spin" />
                       Analyzing Batch ({batchProgress.current}/{batchProgress.total})...
                     </>
                   ) : (
                     <>
-                      <Receipt className="h-5 w-5" />
+                      <Receipt className="h-6 w-6" />
                       Analyze {images.length} Receipts
                     </>
                   )}
                 </button>
                 
                 {batchLoading && (
-                  <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
+                  <div className={`w-full rounded-full h-3 shadow-inner ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`}>
                     <div 
                       className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500 shadow-lg"
                       style={{ width: `${(batchProgress.current / batchProgress.total) * 100}%` }}
