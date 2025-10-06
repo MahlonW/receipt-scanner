@@ -7,6 +7,9 @@ import { ReceiptData } from '@/types/product';
 import { processReceipts } from '@/utils/receiptUtils';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import { ButtonSkeleton, ReceiptCardSkeleton, UploadAreaSkeleton, HeaderSkeleton } from '@/components/LoadingSkeleton';
+import { UserSettings, parseSettingsFromExcel } from '@/utils/settingsUtils';
+import VersionConfirmModal from '@/components/VersionConfirmModal';
+import { APP_CONFIG, VersionManager } from '@/config';
 
 export default function MergePage() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -15,6 +18,14 @@ export default function MergePage() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [showVersionModal, setShowVersionModal] = useState(false);
+  const [versionCompatibility, setVersionCompatibility] = useState<{
+    compatible: boolean;
+    type: 'major' | 'minor' | 'patch' | 'same';
+    message: string;
+  } | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [fileVersion, setFileVersion] = useState<string>('1.0.0');
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   // Initial loading effect
@@ -77,9 +88,36 @@ export default function MergePage() {
     return errors;
   };
 
-  const mergeFiles = async () => {
-    if (uploadedFiles.length === 0) return;
+  const checkVersionCompatibility = (fileSettings: UserSettings) => {
+    const fileVer = fileSettings.version || '1.0.0';
+    setFileVersion(fileVer);
+    const compatibility = VersionManager.isCompatible(APP_CONFIG.VERSION, fileVer);
+    
+    if (VersionManager.shouldShowWarning(compatibility)) {
+      setVersionCompatibility(compatibility);
+      return false; // Need user confirmation
+    }
+    
+    return true; // Safe to proceed
+  };
 
+  const handleVersionConfirm = () => {
+    setShowVersionModal(false);
+    setVersionCompatibility(null);
+    
+    if (pendingFiles.length > 0) {
+      processFiles(pendingFiles);
+      setPendingFiles([]);
+    }
+  };
+
+  const handleVersionCancel = () => {
+    setShowVersionModal(false);
+    setVersionCompatibility(null);
+    setPendingFiles([]);
+  };
+
+  const processFiles = async (files: File[]) => {
     setLoading(true);
     setError(null);
     setValidationErrors([]);
@@ -87,7 +125,7 @@ export default function MergePage() {
 
     try {
       // Process all files concurrently using Promise.all
-      const filePromises = uploadedFiles.map(async (file, index) => {
+      const filePromises = files.map(async (file, index) => {
         try {
           const formData = new FormData();
           formData.append('excel', file);
@@ -164,6 +202,44 @@ export default function MergePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const mergeFiles = async () => {
+    if (uploadedFiles.length === 0) return;
+
+    // Check version compatibility for all files
+    const versionChecks = await Promise.all(
+      uploadedFiles.map(async (file) => {
+        try {
+          const fileBuffer = await file.arrayBuffer();
+          const settings = parseSettingsFromExcel(fileBuffer);
+          return { file, settings, compatible: checkVersionCompatibility(settings) };
+        } catch (err) {
+          console.error(`Error checking version for ${file.name}:`, err);
+          return { file, settings: null, compatible: true }; // Skip version check if parsing fails
+        }
+      })
+    );
+
+    // Check if any files have version issues
+    const incompatibleFiles = versionChecks.filter(check => !check.compatible);
+    
+    if (incompatibleFiles.length > 0) {
+      // Show version warning for the first incompatible file
+      const firstIncompatible = incompatibleFiles[0];
+      if (firstIncompatible.settings) {
+        const fileVer = firstIncompatible.settings.version || '1.0.0';
+        setFileVersion(fileVer);
+        const compatibility = VersionManager.isCompatible(APP_CONFIG.VERSION, fileVer);
+        setVersionCompatibility(compatibility);
+        setPendingFiles(uploadedFiles);
+        setShowVersionModal(true);
+        return;
+      }
+    }
+
+    // All files are compatible, proceed with merge
+    await processFiles(uploadedFiles);
   };
 
   const downloadMerged = async () => {
@@ -491,6 +567,18 @@ export default function MergePage() {
                )}
             </div>
           </div>
+        )}
+
+        {/* Version Confirmation Modal */}
+        {versionCompatibility && (
+          <VersionConfirmModal
+            isOpen={showVersionModal}
+            onClose={handleVersionCancel}
+            onConfirm={handleVersionConfirm}
+            appVersion={APP_CONFIG.VERSION}
+            fileVersion={fileVersion}
+            compatibility={versionCompatibility}
+          />
         )}
       </div>
     </div>
