@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, FileSpreadsheet, History, AlertTriangle, X, FileImage, Store, Calendar, Package, Zap, Trash2 } from 'lucide-react';
+import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, FileSpreadsheet, History, AlertTriangle, X, FileImage, Store, Calendar, Package, Zap, Trash2, LogOut, Moon, Sun } from 'lucide-react';
 import { ReceiptData } from '@/types/product';
 import { processReceipts, findDuplicates } from '@/utils/receiptUtils';
 
@@ -28,6 +28,7 @@ export default function Home() {
   const [duplicates, setDuplicates] = useState<ReceiptData[]>([]);
   const [allReceipts, setAllReceipts] = useState<ReceiptData[]>([]);
   const [autoClearImages, setAutoClearImages] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Load cached receipts on component mount
   useEffect(() => {
@@ -99,6 +100,19 @@ export default function Home() {
     setTokenUsage(null);
     setError(null);
     localStorage.removeItem('receipt-scanner-cache');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
   };
 
   // Update all receipts and check for duplicates
@@ -381,16 +395,37 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-4">
+    <div className={`min-h-screen py-4 transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+    }`}>
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4 shadow-lg">
-            <img src="/logo.svg" alt="Receipt Scanner" className="w-8 h-8" />
+          <div className="flex justify-center items-center gap-4 mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full shadow-lg">
+              <img src="/logo.svg" alt="Receipt Scanner" className="w-8 h-8" />
+            </div>
+            <button
+              onClick={toggleDarkMode}
+              className={`p-3 rounded-full transition-all duration-300 ${
+                isDarkMode 
+                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
+                  : 'bg-gray-800 hover:bg-gray-700 text-white'
+              } shadow-lg hover:shadow-xl transform hover:-translate-y-1`}
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+          <h1 className={`text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3 ${
+            isDarkMode ? 'text-white' : ''
+          }`}>
             Receipt Scanner
           </h1>
-          <p className="text-lg text-gray-600 mb-4 max-w-xl mx-auto">
+          <p className={`text-lg mb-4 max-w-xl mx-auto transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`}>
             Transform your receipts into organized data with AI-powered analysis
           </p>
           
@@ -402,6 +437,14 @@ export default function Home() {
             >
               <History className="h-4 w-4" />
               {showHistory ? 'Hide' : 'Show'} History ({cachedReceipts.length})
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
             </button>
             
             {/* Auto-clear images toggle */}
@@ -495,7 +538,7 @@ export default function Home() {
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                </div>
+        </div>
                 <div>
                   <label
                     htmlFor="multiple-image-upload"

@@ -20,13 +20,90 @@ A Next.js application that uses AI to extract product information from receipt a
    ```
 
 2. **Set up environment variables:**
-   Create a `.env.local` file in the root directory and add your OpenAI API key:
-   ```
+   Create a `.env.local` file in the root directory and add your configuration:
+   ```bash
+   # Required: OpenAI Configuration
    OPENAI_API_KEY=your_openai_api_key_here
    OPENAI_MODEL=gpt-4o-mini
+   
+   # Optional: Password Protection (choose one)
+   APP_PASSWORD=your_secure_password_here
+   # OR for multiple passwords:
+   # APP_PASSWORDS=["admin123", "user456", "guest789"]
+   
+   # Optional: Application Configuration
+   NODE_ENV=development
+   PORT=3000
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
    
    Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+
+## Environment Variables Reference
+
+### Required Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `OPENAI_API_KEY` | Your OpenAI API key for AI analysis | `sk-...` |
+| `OPENAI_MODEL` | AI model to use for receipt analysis | `gpt-4o-mini` |
+
+### Optional Variables
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `APP_PASSWORD` | Single password for authentication | None | `mySecurePassword123` |
+| `APP_PASSWORDS` | Multiple passwords (JSON array) | None | `["admin", "user", "guest"]` |
+| `NODE_ENV` | Application environment | `development` | `production` |
+| `PORT` | Server port | `3000` | `8080` |
+| `NEXT_PUBLIC_APP_URL` | Public URL for the application | `http://localhost:3000` | `https://yourdomain.com` |
+
+### Password Protection Options
+
+**Option 1: Single Password**
+```bash
+APP_PASSWORD=mySecurePassword123
+```
+
+**Option 2: Multiple Passwords**
+```bash
+APP_PASSWORDS=["admin123", "user456", "guest789"]
+```
+
+**Option 3: No Authentication**
+```bash
+# Don't set APP_PASSWORD or APP_PASSWORDS
+```
+
+### Available AI Models
+
+| Model | Description | Cost | Speed |
+|-------|-------------|------|-------|
+| `gpt-4o-mini` | Recommended for cost efficiency | Low | Fast |
+| `gpt-4o` | Most capable model | High | Medium |
+| `gpt-4-turbo` | Balanced performance | Medium | Medium |
+| `gpt-3.5-turbo` | Fast and cheap | Very Low | Very Fast |
+| `gpt-5-nano` | Latest model (if available) | Low | Fast |
+
+### Environment File Examples
+
+**Development (.env.local):**
+```bash
+OPENAI_API_KEY=sk-your-dev-key-here
+OPENAI_MODEL=gpt-4o-mini
+APP_PASSWORD=dev123
+NODE_ENV=development
+```
+
+**Production (.env):**
+```bash
+OPENAI_API_KEY=sk-your-prod-key-here
+OPENAI_MODEL=gpt-4o-mini
+APP_PASSWORDS=["admin2024", "user2024", "backup2024"]
+NODE_ENV=production
+PORT=3000
+NEXT_PUBLIC_APP_URL=https://yourdomain.com
+```
 
 3. **Run the development server:**
    ```bash
