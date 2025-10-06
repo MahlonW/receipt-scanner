@@ -404,7 +404,7 @@ export default function Home() {
           <div className="flex justify-between items-center mb-8">
             <div className="w-12"></div> {/* Spacer for centering */}
             <div className="text-center">
-              <h1 className={`text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2 ${
+              <h1 className={`text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3 pb-1 ${
                 isDarkMode ? 'text-white' : ''
               }`}>
                 Receipt Scanner

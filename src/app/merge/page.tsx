@@ -193,7 +193,7 @@ export default function MergePage() {
               }`} />
             </Link>
             <div className="text-center">
-              <h1 className={`text-5xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2 ${
+              <h1 className={`text-5xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-3 pb-1 ${
                 isDarkMode ? 'text-white' : ''
               }`}>
                 Merge Excel Files
