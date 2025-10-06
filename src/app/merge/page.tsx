@@ -1,19 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileSpreadsheet, Upload, Download, AlertCircle, CheckCircle, ArrowLeft, Trash2, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { ReceiptData } from '@/types/product';
 import { processReceipts } from '@/utils/receiptUtils';
 import { useDarkMode } from '@/contexts/DarkModeContext';
+import { CardSkeleton, ButtonSkeleton, ReceiptCardSkeleton, UploadAreaSkeleton, HeaderSkeleton } from '@/components/LoadingSkeleton';
+import SlidingFade from '@/components/SlidingFade';
 
 export default function MergePage() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [mergedData, setMergedData] = useState<ReceiptData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+
+  // Initial loading effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -169,6 +180,21 @@ export default function MergePage() {
   };
 
 
+  if (isInitialLoading) {
+    return (
+      <div className={`min-h-screen py-4 transition-colors duration-300 ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+          : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+      }`}>
+        <div className="max-w-5xl mx-auto px-4">
+          <HeaderSkeleton />
+          <UploadAreaSkeleton />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen py-4 transition-colors duration-300 ${
       isDarkMode 
@@ -291,33 +317,33 @@ export default function MergePage() {
                 ))}
               </div>
               
-              <div className="flex gap-4 mt-6">
-                <button
-                  onClick={mergeFiles}
-                  disabled={loading}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 disabled:transform-none disabled:hover:scale-100"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Merging...
-                    </>
-                  ) : (
-                    <>
-                      <FileSpreadsheet className="h-5 w-5" />
-                      Merge Files
-                    </>
-                  )}
-                </button>
-                
-                <button
-                  onClick={clearAll}
-                  className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-8 py-4 rounded-xl font-bold hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
-                >
-                  <Trash2 className="h-5 w-5" />
-                  Clear All
-                </button>
-              </div>
+               <div className="flex gap-4 mt-6">
+                 {loading ? (
+                   <>
+                     <ButtonSkeleton />
+                     <ButtonSkeleton />
+                   </>
+                 ) : (
+                   <>
+                     <button
+                       onClick={mergeFiles}
+                       disabled={loading}
+                       className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 disabled:transform-none disabled:hover:scale-100"
+                     >
+                       <FileSpreadsheet className="h-5 w-5" />
+                       Merge Files
+                     </button>
+                     
+                     <button
+                       onClick={clearAll}
+                       className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-8 py-4 rounded-xl font-bold hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
+                     >
+                       <Trash2 className="h-5 w-5" />
+                       Clear All
+                     </button>
+                   </>
+                 )}
+               </div>
             </div>
           )}
         </div>
@@ -392,8 +418,13 @@ export default function MergePage() {
               </button>
             </div>
 
-            <div className="grid gap-3">
-              {mergedData.map((receipt, index) => (
+             <div className="grid gap-3">
+               {loading ? (
+                 Array.from({ length: 3 }).map((_, index) => (
+                   <ReceiptCardSkeleton key={index} />
+                 ))
+               ) : (
+                 mergedData.map((receipt, index) => (
                 <div key={index} className={`border rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 ${
                   isDarkMode 
                     ? 'bg-gradient-to-r from-gray-800 to-gray-700 border-gray-600' 
@@ -432,7 +463,8 @@ export default function MergePage() {
                     </div>
                   </div>
                 </div>
-              ))}
+                ))
+               )}
             </div>
           </div>
         )}

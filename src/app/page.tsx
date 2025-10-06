@@ -6,6 +6,8 @@ import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, FileSpreadsheet, Hi
 import { ReceiptData } from '@/types/product';
 import { processReceipts, findDuplicates } from '@/utils/receiptUtils';
 import { useDarkMode } from '@/contexts/DarkModeContext';
+import { CardSkeleton, ButtonSkeleton, ReceiptCardSkeleton, UploadAreaSkeleton, HeaderSkeleton } from '@/components/LoadingSkeleton';
+import SlidingFade from '@/components/SlidingFade';
 
 export default function Home() {
   const [image, setImage] = useState<File | null>(null);
@@ -29,24 +31,34 @@ export default function Home() {
   const [duplicates, setDuplicates] = useState<ReceiptData[]>([]);
   const [allReceipts, setAllReceipts] = useState<ReceiptData[]>([]);
   const [autoClearImages, setAutoClearImages] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   // Load cached receipts on component mount
   useEffect(() => {
-    const cached = localStorage.getItem('receipt-scanner-cache');
-    if (cached) {
+    const loadInitialData = async () => {
       try {
-        const parsed = JSON.parse(cached);
-        // Separate receipts by source
-        const excelReceipts = parsed.filter((r: ReceiptData) => r.source === 'excel');
-        const otherReceipts = parsed.filter((r: ReceiptData) => r.source !== 'excel');
-        
-        setExistingData(excelReceipts);
-        setCachedReceipts(otherReceipts);
+        const cached = localStorage.getItem('receipt-scanner-cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          // Separate receipts by source
+          const excelReceipts = parsed.filter((r: ReceiptData) => r.source === 'excel');
+          const otherReceipts = parsed.filter((r: ReceiptData) => r.source !== 'excel');
+          
+          setExistingData(excelReceipts);
+          setCachedReceipts(otherReceipts);
+        }
       } catch (error) {
         console.error('Error loading cached receipts:', error);
+      } finally {
+        // Simulate loading time for better UX
+        setTimeout(() => {
+          setIsInitialLoading(false);
+        }, 800);
       }
-    }
+    };
+
+    loadInitialData();
   }, []);
 
   // Save receipt data to cache
@@ -391,6 +403,22 @@ export default function Home() {
       currency: 'USD',
     }).format(price);
   };
+
+  if (isInitialLoading) {
+    return (
+      <div className={`min-h-screen py-4 transition-colors duration-300 ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+          : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+      }`}>
+        <div className="max-w-5xl mx-auto px-4">
+          <HeaderSkeleton />
+          <UploadAreaSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen py-4 transition-colors duration-300 ${
@@ -752,7 +780,12 @@ export default function Home() {
               </div>
             ) : (
               <div className="grid gap-4">
-                {cachedReceipts.map((receipt, index) => (
+                {loading ? (
+                  Array.from({ length: 3 }).map((_, index) => (
+                    <ReceiptCardSkeleton key={index} />
+                  ))
+                ) : (
+                  cachedReceipts.map((receipt, index) => (
                   <div key={index} className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
@@ -790,7 +823,8 @@ export default function Home() {
                       <p>Items: {receipt.products.map(p => p.name).join(', ')}</p>
                     </div>
                   </div>
-                ))}
+                ))
+                )}
               </div>
             )}
           </div>
