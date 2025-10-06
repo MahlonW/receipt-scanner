@@ -57,6 +57,7 @@ A Next.js application that uses AI to extract product information from receipt a
 | `NODE_ENV` | Application environment | `development` | `production` |
 | `PORT` | Server port | `3000` | `8080` |
 | `NEXT_PUBLIC_APP_URL` | Public URL for the application | `http://localhost:3000` | `https://yourdomain.com` |
+| `NEXT_PUBLIC_DEBUG` | Enable debug information display | `false` | `true`, `false` |
 
 ### Password Protection Options
 
