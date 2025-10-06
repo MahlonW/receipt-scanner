@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, FileSpreadsheet, History, AlertTriangle, X, FileImage, Store, Calendar, Package, Zap, Trash2, LogOut, Moon, Sun, Settings } from 'lucide-react';
+import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, FileSpreadsheet, History, AlertTriangle, X, FileImage, Store, Calendar, Package, Zap, Trash2, LogOut, Moon, Sun, Settings, BarChart3, Camera } from 'lucide-react';
 import { ReceiptData } from '@/types/product';
 import { processReceipts, findDuplicates } from '@/utils/receiptUtils';
 import { useDarkMode } from '@/contexts/DarkModeContext';
@@ -10,6 +10,7 @@ import { CardSkeleton, ReceiptCardSkeleton, UploadAreaSkeleton, HeaderSkeleton }
 import { UserSettings, parseSettingsFromExcel, getDefaultSettings, getSheetVisibility } from '@/utils/settingsUtils';
 import SettingsModal from '@/components/SettingsModal';
 import VersionConfirmModal from '@/components/VersionConfirmModal';
+import CameraCapture from '@/components/CameraCapture';
 import { APP_CONFIG, VersionManager } from '@/config';
 
 export default function Home() {
@@ -45,6 +46,8 @@ export default function Home() {
   } | null>(null);
   const [pendingExcelFile, setPendingExcelFile] = useState<File | null>(null);
   const [fileVersion, setFileVersion] = useState<string>('1.0.0');
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraMode, setCameraMode] = useState<'single' | 'multiple'>('single');
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   // Load cached receipts and settings on component mount
@@ -208,6 +211,23 @@ export default function Home() {
     setPendingExcelFile(null);
   };
 
+  const handleCameraCapture = (file: File) => {
+    setImage(file);
+    setImages([]); // Clear multiple images when single capture
+    setShowCamera(false);
+  };
+
+  const handleMultipleCameraCapture = (files: File[]) => {
+    setImages(files);
+    setImage(null); // Clear single image when multiple capture
+    setShowCamera(false);
+  };
+
+  const openCamera = (mode: 'single' | 'multiple') => {
+    setCameraMode(mode);
+    setShowCamera(true);
+  };
+
   const processExcelFile = async (file: File) => {
     try {
       const formData = new FormData();
@@ -295,7 +315,7 @@ export default function Home() {
   // Check for duplicates when data changes
   useEffect(() => {
     updateAllReceipts();
-  }, [existingData, cachedReceipts, batchResults, receiptData]);
+  }, [existingData, cachedReceipts, batchResults, receiptData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Save all data to cache when it changes
   useEffect(() => {
@@ -713,6 +733,16 @@ export default function Home() {
                   <FileSpreadsheet className="h-6 w-6" />
                   Merge Excel Files
                 </Link>
+                <Link
+                  href="/analytics"
+                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
+                >
+                  <BarChart3 className="h-6 w-6" />
+                  Analytics
+                  <span className="px-2 py-1 bg-yellow-500 text-yellow-900 text-xs font-bold rounded-full">
+                    BETA
+                  </span>
+                </Link>
               </div>
               <input
                 id="excel-upload"
@@ -745,14 +775,15 @@ export default function Home() {
               isDarkMode ? 'text-gray-300' : 'text-gray-600'
             }`}>Choose single or multiple receipt upload</p>
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              {/* Desktop Upload Options */}
+              <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 gap-4 justify-center">
                 <div>
                   <label
                     htmlFor="image-upload"
                     className="cursor-pointer bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
                   >
                     <Upload className="h-5 w-5" />
-                    Single Image
+                    Upload Single Image
                   </label>
                   <input
                     id="image-upload"
@@ -768,7 +799,7 @@ export default function Home() {
                     className="cursor-pointer bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-4 rounded-xl font-bold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
                   >
                     <Upload className="h-5 w-5" />
-                    Multiple Images
+                    Upload Multiple Images
                   </label>
                   <input
                     id="multiple-image-upload"
@@ -778,6 +809,65 @@ export default function Home() {
                     onChange={handleMultipleImageUpload}
                     className="hidden"
                   />
+                </div>
+              </div>
+
+              {/* Mobile Upload Options */}
+              <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-4 justify-center">
+                <div>
+                  <label
+                    htmlFor="image-upload-mobile"
+                    className="cursor-pointer bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
+                  >
+                    <Upload className="h-5 w-5" />
+                    Upload Single
+                  </label>
+                  <input
+                    id="image-upload-mobile"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="multiple-image-upload-mobile"
+                    className="cursor-pointer bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
+                  >
+                    <Upload className="h-5 w-5" />
+                    Upload Multiple
+                  </label>
+                  <input
+                    id="multiple-image-upload-mobile"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleMultipleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+
+              {/* Camera Options - Mobile Only */}
+              <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-4 justify-center">
+                <div>
+                  <button
+                    onClick={() => openCamera('single')}
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
+                  >
+                    <Camera className="h-5 w-5" />
+                    Camera Single
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={() => openCamera('multiple')}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-4 rounded-xl font-bold hover:from-orange-600 hover:to-orange-700 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105"
+                  >
+                    <Camera className="h-5 w-5" />
+                    Camera Multiple
+                  </button>
                 </div>
               </div>
               
@@ -1405,6 +1495,15 @@ export default function Home() {
                 compatibility={versionCompatibility}
               />
             )}
+
+            {/* Camera Capture Modal */}
+            <CameraCapture
+              isOpen={showCamera}
+              onClose={() => setShowCamera(false)}
+              onCapture={handleCameraCapture}
+              onMultipleCapture={handleMultipleCameraCapture}
+              multiple={cameraMode === 'multiple'}
+            />
           </div>
     </div>
   );

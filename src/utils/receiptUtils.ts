@@ -69,7 +69,6 @@ export function findDuplicates(receipts: ReceiptData[]): ReceiptData[] {
       });
       
       // Keep the first one (highest priority) as original, mark others as duplicates
-      const original = group[0];
       const duplicatesInGroup = group.slice(1);
       
       duplicatesInGroup.forEach(duplicate => {

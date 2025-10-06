@@ -104,8 +104,6 @@ export function UploadAreaSkeleton() {
 }
 
 export function HeaderSkeleton() {
-  const { isDarkMode } = useDarkMode();
-  
   return (
     <div className="text-center mb-8">
       <div className="flex justify-between items-center mb-8">
