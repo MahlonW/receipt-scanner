@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { FileSpreadsheet, Upload, Download, AlertCircle, CheckCircle, ArrowLeft, Trash2 } from 'lucide-react';
+import { FileSpreadsheet, Upload, Download, AlertCircle, CheckCircle, ArrowLeft, Trash2, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { ReceiptData } from '@/types/product';
 import { processReceipts } from '@/utils/receiptUtils';
+import { useDarkMode } from '@/contexts/DarkModeContext';
 
 export default function MergePage() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -12,6 +13,7 @@ export default function MergePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -166,38 +168,76 @@ export default function MergePage() {
     setValidationErrors([]);
   };
 
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-4">
+    <div className={`min-h-screen py-4 transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
+    }`}>
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Link 
               href="/"
-              className="p-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              className={`p-2 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
+                isDarkMode 
+                  ? 'bg-gray-800/60 hover:bg-gray-700/60' 
+                  : 'bg-white/80 hover:bg-white/90'
+              }`}
             >
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
+              <ArrowLeft className={`h-5 w-5 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`} />
             </Link>
             <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-600 to-green-700 rounded-full shadow-lg">
               <img src="/logo.svg" alt="Receipt Scanner" className="h-6 w-6" />
             </div>
+            <button
+              onClick={toggleDarkMode}
+              className={`p-3 rounded-full transition-all duration-300 ${
+                isDarkMode 
+                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
+                  : 'bg-gray-800 hover:bg-gray-700 text-white'
+              } shadow-lg hover:shadow-xl transform hover:-translate-y-1`}
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent mb-2">
+          <h1 className={`text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent mb-2 ${
+            isDarkMode ? 'text-white' : ''
+          }`}>
             Merge Excel Files
           </h1>
-          <p className="text-gray-600">
+          <p className={`transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`}>
             Combine multiple Excel files into one organized spreadsheet
           </p>
         </div>
 
         {/* File Upload */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-6 border border-white/20">
-          <div className="border-2 border-dashed border-green-200 rounded-lg p-6 text-center bg-gradient-to-br from-green-50 to-emerald-50">
+        <div className={`backdrop-blur-sm rounded-xl shadow-lg p-6 mb-6 border transition-colors duration-300 ${
+          isDarkMode 
+            ? 'bg-gray-800/60 border-gray-700' 
+            : 'bg-white/90 border-white/20'
+        }`}>
+          <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors duration-300 ${
+            isDarkMode 
+              ? 'border-gray-600 bg-gradient-to-br from-gray-800/50 to-gray-700/50' 
+              : 'border-green-200 bg-gradient-to-br from-green-50 to-emerald-50'
+          }`}>
             <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-4 shadow-lg">
               <Upload className="h-5 w-5 text-white" />
             </div>
-            <h3 className="text-lg font-bold text-gray-800 mb-2">Upload Excel Files</h3>
-            <p className="text-gray-600 mb-4">Select multiple Excel files to merge</p>
+            <h3 className={`text-lg font-bold mb-2 transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
+            }`}>Upload Excel Files</h3>
+            <p className={`mb-4 transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+            }`}>Select multiple Excel files to merge</p>
             
             <label
               htmlFor="file-upload"
@@ -219,14 +259,22 @@ export default function MergePage() {
           {/* Uploaded Files List */}
           {uploadedFiles.length > 0 && (
             <div className="mt-6">
-              <h4 className="text-lg font-semibold text-gray-800 mb-3">Uploaded Files ({uploadedFiles.length})</h4>
+              <h4 className={`text-lg font-semibold mb-3 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-800'
+              }`}>Uploaded Files ({uploadedFiles.length})</h4>
               <div className="space-y-2">
                 {uploadedFiles.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                  <div key={index} className={`flex items-center justify-between rounded-lg p-3 transition-colors duration-300 ${
+                    isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'
+                  }`}>
                     <div className="flex items-center gap-3">
                       <FileSpreadsheet className="h-5 w-5 text-green-600" />
-                      <span className="text-sm font-medium text-gray-700">{file.name}</span>
-                      <span className="text-xs text-gray-500">
+                      <span className={`text-sm font-medium transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                      }`}>{file.name}</span>
+                      <span className={`text-xs transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
                         ({(file.size / 1024).toFixed(1)} KB)
                       </span>
                     </div>
@@ -273,14 +321,24 @@ export default function MergePage() {
 
         {/* Validation Errors */}
         {validationErrors.length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className={`border rounded-xl p-4 mb-6 transition-colors duration-300 ${
+            isDarkMode 
+              ? 'bg-red-900/20 border-red-800' 
+              : 'bg-red-50 border-red-200'
+          }`}>
             <div className="flex items-center gap-2 mb-3">
               <AlertCircle className="h-5 w-5 text-red-600" />
-              <h3 className="text-lg font-semibold text-red-800">Format Validation Errors</h3>
+              <h3 className={`text-lg font-semibold transition-colors duration-300 ${
+                isDarkMode ? 'text-red-300' : 'text-red-800'
+              }`}>Format Validation Errors</h3>
             </div>
             <div className="space-y-2">
               {validationErrors.map((error, index) => (
-                <p key={index} className="text-sm text-red-700 bg-red-100 rounded-lg p-2">
+                <p key={index} className={`text-sm rounded-lg p-2 transition-colors duration-300 ${
+                  isDarkMode 
+                    ? 'text-red-300 bg-red-900/30' 
+                    : 'text-red-700 bg-red-100'
+                }`}>
                   {error}
                 </p>
               ))}
@@ -290,23 +348,35 @@ export default function MergePage() {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className={`border rounded-xl p-4 mb-6 transition-colors duration-300 ${
+            isDarkMode 
+              ? 'bg-red-900/20 border-red-800' 
+              : 'bg-red-50 border-red-200'
+          }`}>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-red-600" />
-              <p className="text-red-800">{error}</p>
+              <p className={`transition-colors duration-300 ${
+                isDarkMode ? 'text-red-300' : 'text-red-800'
+              }`}>{error}</p>
             </div>
           </div>
         )}
 
         {/* Merged Results */}
         {mergedData.length > 0 && (
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-6 border border-white/20">
+          <div className={`backdrop-blur-sm rounded-xl shadow-lg p-6 mb-6 border transition-colors duration-300 ${
+            isDarkMode 
+              ? 'bg-gray-800/60 border-gray-700' 
+              : 'bg-white/90 border-white/20'
+          }`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
                   <CheckCircle className="h-5 w-5 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className={`text-xl font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-800'
+                }`}>
                   Merge Complete ({mergedData.length} receipts)
                 </h2>
               </div>
@@ -321,23 +391,39 @@ export default function MergePage() {
 
             <div className="grid gap-3">
               {mergedData.map((receipt, index) => (
-                <div key={index} className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                <div key={index} className={`border rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-r from-gray-800 to-gray-700 border-gray-600' 
+                    : 'bg-gradient-to-r from-white to-gray-50 border-gray-200'
+                }`}>
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 mb-1">{receipt.store}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{receipt.date}</p>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <h3 className={`font-bold mb-1 transition-colors duration-300 ${
+                        isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>{receipt.store}</h3>
+                      <p className={`text-sm mb-2 transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>{receipt.date}</p>
+                      <div className={`flex items-center gap-4 text-xs transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-500' : 'text-gray-500'
+                      }`}>
                         <span className="flex items-center gap-1">
                           <FileSpreadsheet className="h-3 w-3" />
                           {receipt.products.length} items
                         </span>
-                        <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+                        <span className={`px-2 py-1 rounded-full font-semibold transition-colors duration-300 ${
+                          isDarkMode 
+                            ? 'bg-green-900/50 text-green-300' 
+                            : 'bg-green-100 text-green-700'
+                        }`}>
                           {receipt.source}
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className={`text-lg font-bold transition-colors duration-300 ${
+                        isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>
                         ${receipt.total.toFixed(2)}
                       </p>
                     </div>

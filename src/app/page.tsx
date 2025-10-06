@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Upload, Receipt, Loader2, AlertCircle, CheckCircle, FileSpreadsheet, History, AlertTriangle, X, FileImage, Store, Calendar, Package, Zap, Trash2, LogOut, Moon, Sun } from 'lucide-react';
 import { ReceiptData } from '@/types/product';
 import { processReceipts, findDuplicates } from '@/utils/receiptUtils';
+import { useDarkMode } from '@/contexts/DarkModeContext';
 
 export default function Home() {
   const [image, setImage] = useState<File | null>(null);
@@ -28,7 +29,7 @@ export default function Home() {
   const [duplicates, setDuplicates] = useState<ReceiptData[]>([]);
   const [allReceipts, setAllReceipts] = useState<ReceiptData[]>([]);
   const [autoClearImages, setAutoClearImages] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   // Load cached receipts on component mount
   useEffect(() => {
@@ -111,9 +112,6 @@ export default function Home() {
     }
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
 
   // Update all receipts and check for duplicates
   const updateAllReceipts = () => {
@@ -448,7 +446,11 @@ export default function Home() {
             </button>
             
             {/* Auto-clear images toggle */}
-            <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-white/20">
+            <div className={`flex items-center gap-2 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border transition-colors duration-300 ${
+              isDarkMode 
+                ? 'bg-gray-800/60 border-gray-700' 
+                : 'bg-white/80 border-white/20'
+            }`}>
               <input
                 type="checkbox"
                 id="auto-clear"
@@ -458,7 +460,9 @@ export default function Home() {
                 }}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded accent-blue-600"
               />
-              <label htmlFor="auto-clear" className="text-sm font-medium text-gray-700">
+              <label htmlFor="auto-clear" className={`text-sm font-medium transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-700'
+              }`}>
                 Auto-clear images
               </label>
             </div>
@@ -486,7 +490,11 @@ export default function Home() {
           
           {/* Excel upload */}
           <div className="mb-6">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/20">
+            <div className={`backdrop-blur-sm rounded-xl p-4 shadow-lg border transition-colors duration-300 ${
+              isDarkMode 
+                ? 'bg-gray-800/60 border-gray-700' 
+                : 'bg-white/80 border-white/20'
+            }`}>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <label
                   htmlFor="excel-upload"
@@ -514,13 +522,25 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6 border border-white/20">
-          <div className="border-2 border-dashed border-blue-200 rounded-xl p-8 text-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className={`backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6 border transition-colors duration-300 ${
+          isDarkMode 
+            ? 'bg-gray-800/60 border-gray-700' 
+            : 'bg-white/90 border-white/20'
+        }`}>
+          <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors duration-300 ${
+            isDarkMode 
+              ? 'border-gray-600 bg-gradient-to-br from-gray-800/50 to-gray-700/50' 
+              : 'border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50'
+          }`}>
             <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-4 shadow-lg">
               <Upload className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Upload Your Receipts</h3>
-            <p className="text-gray-600 mb-6">Choose single or multiple receipt upload</p>
+            <h3 className={`text-xl font-bold mb-2 transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
+            }`}>Upload Your Receipts</h3>
+            <p className={`mb-6 transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+            }`}>Choose single or multiple receipt upload</p>
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <div>
@@ -561,8 +581,14 @@ export default function Home() {
               {/* Single image preview */}
               {image && (
                 <div className="mt-8">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
-                    <p className="text-sm font-medium text-gray-700 mb-4 flex items-center gap-2">
+                  <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${
+                    isDarkMode 
+                      ? 'bg-gray-800/60 border-gray-700' 
+                      : 'bg-white/80 border-white/20'
+                  }`}>
+                    <p className={`text-sm font-medium mb-4 flex items-center gap-2 transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
                       <FileImage className="h-4 w-4 text-blue-600" />
                       Selected: {image.name}
                     </p>
@@ -586,7 +612,9 @@ export default function Home() {
               {/* Multiple images preview */}
               {images.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-sm text-gray-600 mb-2">
+                  <p className={`text-sm mb-2 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
                     Selected {images.length} image{images.length > 1 ? 's' : ''}:
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
@@ -967,26 +995,42 @@ export default function Home() {
         )}
 
         {receiptData && (
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/20">
+          <div className={`backdrop-blur-sm rounded-3xl shadow-2xl p-8 border transition-colors duration-300 ${
+            isDarkMode 
+              ? 'bg-gray-800/60 border-gray-700' 
+              : 'bg-white/90 border-white/20'
+          }`}>
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
                 <CheckCircle className="h-6 w-6 text-white" />
               </div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+              <h2 className={`text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent ${
+                isDarkMode ? 'text-white' : ''
+              }`}>
                 Receipt Analysis Complete
               </h2>
             </div>
 
             {receiptData.store && (
-              <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
-                <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <div className={`mb-8 p-6 rounded-2xl border transition-colors duration-300 ${
+                isDarkMode 
+                  ? 'bg-gradient-to-r from-gray-700/50 to-gray-600/50 border-gray-600' 
+                  : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'
+              }`}>
+                <h3 className={`font-bold mb-3 flex items-center gap-2 transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
                   <Store className="h-5 w-5 text-blue-600" />
                   Store Information
                 </h3>
                 <div className="space-y-2">
-                  <p className="text-lg font-semibold text-gray-800">{receiptData.store}</p>
+                  <p className={`text-lg font-semibold transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-200' : 'text-gray-800'
+                  }`}>{receiptData.store}</p>
                   {receiptData.date && (
-                    <p className="text-gray-600 flex items-center gap-2">
+                    <p className={`flex items-center gap-2 transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
                       <Calendar className="h-4 w-4" />
                       {receiptData.date}
                     </p>
@@ -996,26 +1040,48 @@ export default function Home() {
             )}
 
             {tokenUsage && (
-              <div className="mb-8 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-200">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <div className={`mb-8 p-6 rounded-2xl border transition-colors duration-300 ${
+                isDarkMode 
+                  ? 'bg-gradient-to-r from-gray-700/50 to-gray-600/50 border-gray-600' 
+                  : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200'
+              }`}>
+                <h3 className={`font-bold mb-4 flex items-center gap-2 transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
                   <Zap className="h-5 w-5 text-purple-600" />
                   API Usage
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="text-center p-4 bg-white/60 rounded-xl">
-                    <p className="text-sm text-gray-600 mb-1">Prompt Tokens</p>
+                  <div className={`text-center p-4 rounded-xl transition-colors duration-300 ${
+                    isDarkMode ? 'bg-gray-800/60' : 'bg-white/60'
+                  }`}>
+                    <p className={`text-sm mb-1 transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Prompt Tokens</p>
                     <p className="text-xl font-bold text-purple-700">{tokenUsage.promptTokens.toLocaleString()}</p>
                   </div>
-                  <div className="text-center p-4 bg-white/60 rounded-xl">
-                    <p className="text-sm text-gray-600 mb-1">Completion Tokens</p>
+                  <div className={`text-center p-4 rounded-xl transition-colors duration-300 ${
+                    isDarkMode ? 'bg-gray-800/60' : 'bg-white/60'
+                  }`}>
+                    <p className={`text-sm mb-1 transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Completion Tokens</p>
                     <p className="text-xl font-bold text-purple-700">{tokenUsage.completionTokens.toLocaleString()}</p>
                   </div>
-                  <div className="text-center p-4 bg-white/60 rounded-xl">
-                    <p className="text-sm text-gray-600 mb-1">Total Tokens</p>
+                  <div className={`text-center p-4 rounded-xl transition-colors duration-300 ${
+                    isDarkMode ? 'bg-gray-800/60' : 'bg-white/60'
+                  }`}>
+                    <p className={`text-sm mb-1 transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Total Tokens</p>
                     <p className="text-xl font-bold text-purple-700">{tokenUsage.totalTokens.toLocaleString()}</p>
                   </div>
-                  <div className="text-center p-4 bg-white/60 rounded-xl">
-                    <p className="text-sm text-gray-600 mb-1">Estimated Cost</p>
+                  <div className={`text-center p-4 rounded-xl transition-colors duration-300 ${
+                    isDarkMode ? 'bg-gray-800/60' : 'bg-white/60'
+                  }`}>
+                    <p className={`text-sm mb-1 transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>Estimated Cost</p>
                     <p className="text-xl font-bold text-green-600">{tokenUsage.cost}</p>
                   </div>
                 </div>
@@ -1023,7 +1089,9 @@ export default function Home() {
             )}
 
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <h3 className={`text-2xl font-bold mb-6 flex items-center gap-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
                 <Package className="h-6 w-6 text-blue-600" />
                 Products ({receiptData.products.length})
               </h3>
@@ -1031,19 +1099,31 @@ export default function Home() {
                 {receiptData.products.map((product, index) => (
                   <div
                     key={index}
-                    className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                    className={`border rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
+                      isDarkMode 
+                        ? 'bg-gradient-to-r from-gray-800 to-gray-700 border-gray-600' 
+                        : 'bg-gradient-to-r from-white to-gray-50 border-gray-200'
+                    }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h4 className="text-lg font-bold text-gray-900 mb-2">{product.name}</h4>
+                        <h4 className={`text-lg font-bold mb-2 transition-colors duration-300 ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>{product.name}</h4>
                         {product.description && (
-                          <p className="text-sm text-gray-600 mb-3">
+                          <p className={`text-sm mb-3 transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                             {product.description}
                           </p>
                         )}
                         <div className="flex gap-4 text-sm">
                           {product.quantity && (
-                            <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
+                            <span className={`px-2 py-1 rounded-full font-semibold transition-colors duration-300 ${
+                              isDarkMode 
+                                ? 'bg-blue-900/50 text-blue-300' 
+                                : 'bg-blue-100 text-blue-700'
+                            }`}>
                               Qty: {product.quantity}
                             </span>
                           )}
