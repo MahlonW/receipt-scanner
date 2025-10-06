@@ -957,11 +957,15 @@ export default function Home() {
           </div>
         )}
 
-        {/* Debug Section - Remove this in production */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 mb-8">
-            <h3 className="font-semibold text-gray-900 mb-2">Debug Info</h3>
-            <div className="text-sm text-gray-600 space-y-1">
+        {/* Debug Section - Only visible in development with debug flag */}
+        {process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DEBUG === 'true' && (
+          <div className={`mt-6 p-4 rounded-xl border transition-colors duration-300 ${
+            isDarkMode 
+              ? 'bg-gray-800/60 border-gray-700 text-gray-300' 
+              : 'bg-gray-100 border-gray-200 text-gray-700'
+          }`}>
+            <h3 className="font-bold mb-2">Debug Info</h3>
+            <div className="text-sm space-y-1">
               <p>Cached Receipts: {cachedReceipts.length}</p>
               <p>Existing Data: {existingData.length}</p>
               <p>Batch Results: {batchResults.length}</p>
