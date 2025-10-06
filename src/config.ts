@@ -1,7 +1,7 @@
 // Application configuration
 export const APP_CONFIG = {
   // Application version - increment this when making breaking changes
-  VERSION: '0.3.0',
+  VERSION: '0.3.1',
   
   // Version compatibility settings
   VERSION_CHECK: {
