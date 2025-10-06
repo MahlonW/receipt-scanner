@@ -6,8 +6,7 @@ import Link from 'next/link';
 import { ReceiptData } from '@/types/product';
 import { processReceipts } from '@/utils/receiptUtils';
 import { useDarkMode } from '@/contexts/DarkModeContext';
-import { CardSkeleton, ButtonSkeleton, ReceiptCardSkeleton, UploadAreaSkeleton, HeaderSkeleton } from '@/components/LoadingSkeleton';
-import SlidingFade from '@/components/SlidingFade';
+import { ButtonSkeleton, ReceiptCardSkeleton, UploadAreaSkeleton, HeaderSkeleton } from '@/components/LoadingSkeleton';
 
 export default function MergePage() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -87,12 +86,8 @@ export default function MergePage() {
     setMergedData([]);
 
     try {
-      const allReceipts: ReceiptData[] = [];
-      const allErrors: string[] = [];
-
-      for (let i = 0; i < uploadedFiles.length; i++) {
-        const file = uploadedFiles[i];
-        
+      // Process all files concurrently using Promise.all
+      const filePromises = uploadedFiles.map(async (file, index) => {
         try {
           const formData = new FormData();
           formData.append('excel', file);
@@ -103,8 +98,11 @@ export default function MergePage() {
           });
 
           if (!response.ok) {
-            allErrors.push(`File ${i + 1} (${file.name}): Failed to parse - ${response.statusText}`);
-            continue;
+            return {
+              success: false,
+              error: `File ${index + 1} (${file.name}): Failed to parse - ${response.statusText}`,
+              receipts: []
+            };
           }
 
           const data = await response.json();
@@ -112,18 +110,44 @@ export default function MergePage() {
           // Validate the format
           const validationErrors = validateExcelFormat(data);
           if (validationErrors.length > 0) {
-            allErrors.push(`File ${i + 1} (${file.name}): ${validationErrors.join(', ')}`);
-            continue;
+            return {
+              success: false,
+              error: `File ${index + 1} (${file.name}): ${validationErrors.join(', ')}`,
+              receipts: []
+            };
           }
 
           // Process receipts
           const processedData = processReceipts(data, 'excel');
-          allReceipts.push(...processedData);
+          return {
+            success: true,
+            error: null,
+            receipts: processedData
+          };
           
         } catch (err) {
-          allErrors.push(`File ${i + 1} (${file.name}): ${err instanceof Error ? err.message : 'Unknown error'}`);
+          return {
+            success: false,
+            error: `File ${index + 1} (${file.name}): ${err instanceof Error ? err.message : 'Unknown error'}`,
+            receipts: []
+          };
         }
-      }
+      });
+
+      // Wait for all files to be processed
+      const results = await Promise.all(filePromises);
+
+      // Separate successful results from errors
+      const allReceipts: ReceiptData[] = [];
+      const allErrors: string[] = [];
+
+      results.forEach(result => {
+        if (result.success) {
+          allReceipts.push(...result.receipts);
+        } else {
+          allErrors.push(result.error || 'Unknown error');
+        }
+      });
 
       if (allErrors.length > 0) {
         setValidationErrors(allErrors);
