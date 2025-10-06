@@ -175,7 +175,7 @@ export default function MergePage() {
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
     }`}>
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
           {/* Header with back button and dark mode toggle */}
